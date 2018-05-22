@@ -17,6 +17,9 @@ public class Extractor{
 	    Scanner scan = new Scanner(inputFile);
 	    ArrayList<String> myList = new ArrayList<String>();
 
+	    int eventsFound = 0;
+	    int outputCount = 0;
+
 	    boolean expectTitle = false;
 	    boolean expectPubDate = false;
 	    boolean expectContents = false;
@@ -36,6 +39,7 @@ public class Extractor{
 		if(expectTitle && line.contains("<title>")){
 		    //there are 2 tabs before html tags
 		    eventTitle = line.substring(9, line.length() - 8);
+		    eventsFound++;
 		    expectTitle = false;
 		    expectPubDate = true;
 		} else if(expectPubDate && line.contains("<pubDate>")){
@@ -58,7 +62,7 @@ public class Extractor{
 			String fmBottom = "---\n\n";
 
 			//make sure html content is formatted correctly
-			content = htmlFormat(content);
+			contents = htmlFormat(contents);
 			
 			try{
 			    File outputFile = new File("md-events", fileName);
@@ -80,6 +84,7 @@ public class Extractor{
 				fos.write(contents.getBytes());
 				fos.flush();
 				fos.close();
+				outputCount++;
 
 				//reset for next event collection
 				eventTitle = "";
@@ -88,18 +93,18 @@ public class Extractor{
 				contents = "";
 				expectContents = false;
 			    } catch(IOException e){
-				System.out.println("@@@IOException 1");
+				System.out.println("IOException 1: fos method failed");
 			    } finally{
 				try{
 				    if(fos != null){
 					fos.close();
 				    }
 				} catch(IOException e){
-				    System.out.println("@@@IOException 2");
+				    System.out.println("IOException 2: fos method failed");
 				}
 			    }
 			} catch(IOException e){
-			    System.out.println("@@@IOException 3");
+			    System.out.println("IOException 3: outputFile method failed");
 			}
 		    } else{
 			//this line is content
@@ -110,8 +115,14 @@ public class Extractor{
 		}
 	    }
 	    scan.close();
+	    System.out.println("   ___________________________");
+	    System.out.println("  | Extracted to \"md-events/\"");
+	    System.out.println("  |");
+	    System.out.println("  | Events read: " + eventsFound);
+	    System.out.println("  | Files created: " + outputCount);
+	    System.out.println("  |___________________________\n");
 	} catch(FileNotFoundException e){
-	    System.out.println("@@@FileNotFoundException");
+	    System.out.println("FileNotFoundException 1: events.xml not found");
 	}
     }
 
@@ -160,8 +171,8 @@ public class Extractor{
 	return year + "-" + month + "-" + day + " " + time;
     }
 
-    public static String htmlFormat(String content){
-	return content;
+    public static String htmlFormat(String contents){
+	return contents;
     }
 
     public static String monthAbbrToNum(String month){

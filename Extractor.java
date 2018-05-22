@@ -8,8 +8,6 @@ import java.util.Scanner;
 /*
  * Get all event html content and put them into markdown files
  *
- * Make sure wp exported xml's post years are not -0001
- *
  */
 
 public class Extractor{
@@ -41,7 +39,10 @@ public class Extractor{
 		    expectTitle = false;
 		    expectPubDate = true;
 		} else if(expectPubDate && line.contains("<pubDate>")){
+		    //wordpress may export post year as -0001, change to 2000
+		    line = line.replace("-0001", "2000");
 		    pubDate = line.substring(11, line.length() - 10);
+		    
 		    fileName = toFileName(eventTitle, pubDate);
 		    pubDate = toFrontMatterDate(pubDate);
 		    expectPubDate = false;
@@ -55,11 +56,14 @@ public class Extractor{
 			String fmDate = "date: " + pubDate + "\n";
 			String fmLayout = "layout: post\n";
 			String fmBottom = "---\n\n";
+
+			//make sure html content is formatted correctly
+			content = htmlFormat(content);
 			
 			try{
 			    File outputFile = new File("md-events", fileName);
 			    if(outputFile.exists()) {
-				//if file exists, recreate it
+				//replace file
 				outputFile.delete();
 				outputFile.createNewFile();
 			    } else{
@@ -154,6 +158,10 @@ public class Extractor{
 	String day = date.substring(5, 7);
 	String time = date.substring(17);
 	return year + "-" + month + "-" + day + " " + time;
+    }
+
+    public static String htmlFormat(String content){
+	return content;
     }
 
     public static String monthAbbrToNum(String month){

@@ -172,6 +172,8 @@ public class Extractor{
     }
 
     public static String htmlFormat(String contents){
+	//newline every tag so it renders properly
+	contents = contents.replace("><", ">\n<");
 	return contents;
     }
 
